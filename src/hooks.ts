@@ -16,6 +16,10 @@ export async function handle({request, resolve}) {
   // code here happens before the endpoint or page is called
   if (protectedPages.includes(request.path)) {
     console.log('THIS SHOULD BE PROTECTED');
+    console.log(cookies.user);
+    console.log(cookies.idToken);
+    console.log(isTokenOK(cookies.idToken))
+
     if (!cookies.user || !isTokenOK(cookies.idToken)) {
       return {
         status: 401
@@ -53,8 +57,10 @@ export async function getSession(request) {
 function isTokenOK(idToken: string): boolean {
   const decoded = decode(idToken);
   if (!decoded) return false;
+  console.log(`decoded: ${JSON.stringify(decoded)}`)
   if (decoded.iss !== issuer) return false;
-  const date = new Date(decoded.exp);
-  if (date < new Date()) return false;
+  const dateExp = new Date(decoded.exp*1000);
+  console.log(dateExp)
+  if (dateExp < new Date()) return false;
   return true;
 }
